@@ -86,3 +86,8 @@ func QGetCredits(db *sql.DB, start int, count int) ([]CreditSchema, error) {
 
 	return credits, nil
 }
+
+func QClearCredit(db *sql.DB) error {
+	_, err := db.Exec("TRUNCATE TABLE credit")
+	return err
+}

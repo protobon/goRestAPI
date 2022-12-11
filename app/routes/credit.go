@@ -116,7 +116,7 @@ func (credit *Credit) getCredits(ctx *gin.Context, db *sql.DB) {
 }
 
 func (credit *Credit) clearCredit(ctx *gin.Context, db *sql.DB) {
-	if err := model.QClearTable(db); err != nil {
+	if err := model.QClearCredit(db); err != nil {
 		ctx.JSON(500, err)
 		return
 	}
@@ -140,7 +140,7 @@ func (credit *Credit) InitializeRoutes(db *sql.DB) {
 	credit.Router.DELETE("/credit/:id", func(ctx *gin.Context) {
 		credit.deleteCredit(ctx, db)
 	})
-	credit.Router.DELETE("/credit/clear", func(ctx *gin.Context) {
-		credit.clearCredit(ctx, db)
-	})
+	//credit.Router.DELETE("/credit/clear", func(ctx *gin.Context) {
+	//	credit.clearCredit(ctx, db)
+	//})
 }
