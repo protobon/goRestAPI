@@ -1,6 +1,7 @@
 package app
 
 import (
+	"awesomeProject/app/routes"
 	"awesomeProject/database"
 	"awesomeProject/model"
 	"database/sql"
@@ -31,9 +32,10 @@ func (a *App) Initialize(user string, password string, dbname string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 	a.Router = gin.Default()
-	a.initializeRoutes()
+
+	var credit = routes.Credit{Router: a.Router, DB: a.DB}
+	credit.InitializeRoutes(credit.DB)
 }
 
 func (a *App) getProduct(c *gin.Context) {
@@ -143,20 +145,20 @@ func (a *App) getProducts(c *gin.Context) {
 	c.JSON(200, products)
 }
 
-func (a *App) initializeRoutes() {
-	a.Router.GET("/products", func(c *gin.Context) {
-		a.getProducts(c)
-	})
-	a.Router.POST("/product", func(c *gin.Context) {
-		a.createProduct(c)
-	})
-	a.Router.GET("/product/:id", func(c *gin.Context) {
-		a.getProduct(c)
-	})
-	a.Router.PUT("/product/:id", func(c *gin.Context) {
-		a.updateProduct(c)
-	})
-	a.Router.DELETE("/product/:id", func(c *gin.Context) {
-		a.deleteProduct(c)
-	})
-}
+//func (a *App) initializeRoutes() {
+//	a.Router.GET("/products", func(c *gin.Context) {
+//		a.getProducts(c)
+//	})
+//	a.Router.POST("/product", func(c *gin.Context) {
+//		a.createProduct(c)
+//	})
+//	a.Router.GET("/product/:id", func(c *gin.Context) {
+//		a.getProduct(c)
+//	})
+//	a.Router.PUT("/product/:id", func(c *gin.Context) {
+//		a.updateProduct(c)
+//	})
+//	a.Router.DELETE("/product/:id", func(c *gin.Context) {
+//		a.deleteProduct(c)
+//	})
+//}
