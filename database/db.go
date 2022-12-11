@@ -1,6 +1,7 @@
 package database
 
 import (
+	"awesomeProject/common"
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
@@ -23,20 +24,19 @@ func DBInit(user string, password string, dbname string) *sql.DB {
 		log.Fatal(err)
 	}
 
-	CreateTableProducts(db)
+	CreateTableProduct(db)
+	CreateTableCredit(db)
 	return db
 }
 
-func CreateTableProducts(db *sql.DB) {
-	if _, err := db.Exec(productsTableCreationQuery); err != nil {
+func CreateTableProduct(db *sql.DB) {
+	if _, err := db.Exec(common.ProductTableCreationQuery); err != nil {
 		log.Fatal(err)
 	}
 }
 
-const productsTableCreationQuery = `CREATE TABLE IF NOT EXISTS products
-(
-   id SERIAL,
-   name TEXT NOT NULL,
-   price NUMERIC(10,2) NOT NULL DEFAULT 0.00,
-   CONSTRAINT products_pkey PRIMARY KEY (id)
-)`
+func CreateTableCredit(db *sql.DB) {
+	if _, err := db.Exec(common.CreditTableCreationQuery); err != nil {
+		log.Fatal(err)
+	}
+}
