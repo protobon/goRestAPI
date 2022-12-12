@@ -3,6 +3,7 @@ package model
 import (
 	"awesomeProject/common"
 	"database/sql"
+	"errors"
 	"log"
 	"time"
 )
@@ -15,12 +16,12 @@ type CreditSchema struct {
 	CurrentFee     uint8     `json:"currentFee"`
 	CurrentFeePaid bool      `json:"currentFeePaid"`
 	PurchaseDate   string    `json:"purchaseDate"`
-	Completed      bool      `json:"completed"`
-	CreatedAt      time.Time `json:"createdAt"`
+	Completed      bool      `json:"completed,omitempty"`
+	CreatedAt      time.Time `json:"createdAt,omitempty"`
 }
 
 func (c *CreditSchema) QGetCredit(db *sql.DB) error {
-	return db.QueryRow("SELECT totalPrice FROM credit WHERE id=$1",
+	return db.QueryRow(`SELECT * FROM credit WHERE id=$1`,
 		&c.ID).Scan(&c.TotalPrice)
 }
 
@@ -37,6 +38,8 @@ func (c *CreditSchema) QDeleteCredit(db *sql.DB) error {
 }
 
 func (c *CreditSchema) QCreateCredit(db *sql.DB) error {
+	c.Completed = false
+	c.CreatedAt = time.Now()
 	err := db.QueryRow(common.CreditNewRecord,
 		&c.TotalPrice,
 		&c.FeeAmount,
@@ -45,7 +48,7 @@ func (c *CreditSchema) QCreateCredit(db *sql.DB) error {
 		&c.CurrentFeePaid,
 		&c.PurchaseDate,
 		&c.Completed,
-		time.Now()).Scan(&c.ID)
+		&c.CreatedAt).Scan(&c.ID)
 
 	if err != nil {
 		return err
@@ -85,6 +88,25 @@ func QGetCredits(db *sql.DB, start int, count int) ([]CreditSchema, error) {
 	}
 
 	return credits, nil
+}
+
+func (c *CreditSchema) QPayCredit(db *sql.DB) error {
+	var err error
+	err = db.QueryRow(`SELECT * FROM credit WHERE id=$1`,
+		&c.ID).Scan(&c.ID, &c.TotalPrice, &c.FeeAmount, &c.Fees,
+		&c.CurrentFee, &c.CurrentFeePaid, &c.PurchaseDate,
+		&c.Completed, &c.CreatedAt)
+	if err != nil {
+		return err
+	}
+	if c.CurrentFeePaid == true {
+		return errors.New("quota_already_fulfilled")
+	}
+	c.CurrentFeePaid = true
+	_, err =
+		db.Exec("UPDATE credit SET currentFeePaid=$1 WHERE id=$2",
+			true, &c.ID)
+	return err
 }
 
 func QClearCredit(db *sql.DB) error {

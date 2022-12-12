@@ -53,7 +53,7 @@ func (credit *Credit) createCredit(ctx *gin.Context, db *sql.DB) {
 	ctx.JSON(200, c)
 }
 
-func (credit *Credit) updateCredit(ctx *gin.Context, db *sql.DB) {
+func (credit *Credit) payCredit(ctx *gin.Context, db *sql.DB) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
 		ctx.JSON(400, map[string]string{"error": "Invalid Credit ID"})
@@ -61,7 +61,7 @@ func (credit *Credit) updateCredit(ctx *gin.Context, db *sql.DB) {
 	}
 
 	c := model.CreditSchema{ID: uint32(id)}
-	if err := c.QUpdateCredit(db); err != nil {
+	if err := c.QPayCredit(db); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			ctx.JSON(404, map[string]string{"error": "Credit not found"})
@@ -134,8 +134,8 @@ func (credit *Credit) InitializeRoutes(db *sql.DB) {
 	credit.Router.GET("/credit/:id", func(ctx *gin.Context) {
 		credit.getCredit(ctx, db)
 	})
-	credit.Router.PUT("/credit/:id", func(ctx *gin.Context) {
-		credit.updateCredit(ctx, db)
+	credit.Router.PUT("/credit/pay/:id", func(ctx *gin.Context) {
+		credit.payCredit(ctx, db)
 	})
 	credit.Router.DELETE("/credit/:id", func(ctx *gin.Context) {
 		credit.deleteCredit(ctx, db)
