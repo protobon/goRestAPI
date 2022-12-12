@@ -20,7 +20,9 @@ func (credit *Credit) getCredit(ctx *gin.Context, db *sql.DB) {
 	}
 
 	c := model.CreditSchema{ID: uint32(id)}
-	if err := c.QGetCredit(db); err != nil {
+	var credits []model.CreditSchema
+
+	if credits, err = c.QGetCredit(db); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			ctx.JSON(404, map[string]string{"error": "Credit not found"})
@@ -30,7 +32,7 @@ func (credit *Credit) getCredit(ctx *gin.Context, db *sql.DB) {
 		return
 	}
 
-	ctx.JSON(200, c)
+	ctx.JSON(200, credits)
 }
 
 func (credit *Credit) createCredit(ctx *gin.Context, db *sql.DB) {
@@ -74,6 +76,17 @@ func (credit *Credit) payCredit(ctx *gin.Context, db *sql.DB) {
 	ctx.JSON(200, c)
 }
 
+// Function that triggers the Query to calculate debt for this month
+func (credit *Credit) calcDebtCredit(ctx *gin.Context, db *sql.DB) {
+	debt, err := model.QCalcDebtCredit(db)
+	if err != nil {
+		ctx.JSON(500, err.Error())
+		return
+	}
+
+	ctx.JSON(200, debt)
+}
+
 func (credit *Credit) deleteCredit(ctx *gin.Context, db *sql.DB) {
 	id, err := strconv.Atoi(ctx.Param("id"))
 	if err != nil {
@@ -106,7 +119,7 @@ func (credit *Credit) getCredits(ctx *gin.Context, db *sql.DB) {
 		start = 0
 	}
 
-	credits, err := model.QGetCredits(db, start, count)
+	credits, err := model.QGetAllCredits(db, start, count)
 
 	if err != nil {
 		ctx.JSON(500, err.Error())
@@ -116,7 +129,7 @@ func (credit *Credit) getCredits(ctx *gin.Context, db *sql.DB) {
 }
 
 func (credit *Credit) clearCredit(ctx *gin.Context, db *sql.DB) {
-	if err := model.QClearCredit(db); err != nil {
+	if err := model.QClearTableCredit(db); err != nil {
 		ctx.JSON(500, err)
 		return
 	}
@@ -139,6 +152,9 @@ func (credit *Credit) InitializeRoutes(db *sql.DB) {
 	})
 	credit.Router.DELETE("/credit/:id", func(ctx *gin.Context) {
 		credit.deleteCredit(ctx, db)
+	})
+	credit.Router.GET("/credit/debt", func(ctx *gin.Context) {
+		credit.calcDebtCredit(ctx, db)
 	})
 	//credit.Router.DELETE("/credit/clear", func(ctx *gin.Context) {
 	//	credit.clearCredit(ctx, db)
