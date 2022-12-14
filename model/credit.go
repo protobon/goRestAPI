@@ -24,9 +24,10 @@ type CreditSchema struct {
 func (c *CreditSchema) QGetCredit(db *sql.DB) ([]CreditSchema, error) {
 	var rows *sql.Rows
 	var err error
-	var query = fmt.Sprintf("SELECT * FROM credit WHERE id=%d", &c.ID)
+	fmt.Printf("ID: %d", c.ID)
+	var query = fmt.Sprintf("SELECT * FROM credit WHERE id=%d", c.ID)
 	if c.ID == 0 {
-		query = "SELECT * FROM credit WHERE currentFeePaid=false"
+		query = "SELECT * FROM credit WHERE currentFeePaid=false AND completed=false"
 	}
 
 	rows, err = db.Query(query)
@@ -79,7 +80,7 @@ func (c *CreditSchema) QCreateCredit(db *sql.DB) error {
 		&c.CurrentFee,
 		&c.CurrentFeePaid,
 		&c.PurchaseDate,
-		&c.Completed,
+		false,
 		&c.CreatedAt).Scan(&c.ID)
 
 	if err != nil {
@@ -87,6 +88,42 @@ func (c *CreditSchema) QCreateCredit(db *sql.DB) error {
 	}
 
 	return nil
+}
+
+func (c *CreditSchema) QPayCredit(db *sql.DB) error {
+	var err error
+	err = db.QueryRow(`SELECT * FROM credit WHERE id=$1`,
+		&c.ID).Scan(&c.ID, &c.TotalPrice, &c.FeeAmount, &c.Fees,
+		&c.CurrentFee, &c.CurrentFeePaid, &c.PurchaseDate,
+		&c.Completed, &c.CreatedAt)
+	if err != nil {
+		return err
+	}
+	if c.Completed == true {
+		return errors.New("full_payment_already_fulfilled")
+	}
+	if c.CurrentFeePaid == true {
+		return errors.New("quota_already_fulfilled")
+	}
+
+	c.CurrentFeePaid = true
+	if c.CurrentFee == c.Fees {
+		_, err =
+			db.Exec("UPDATE credit SET currentFeePaid=true, completed=true WHERE id=$1",
+				&c.ID)
+		return err
+	}
+	_, err =
+		db.Exec("UPDATE credit SET currentFeePaid=true WHERE id=$1",
+			&c.ID)
+	return err
+}
+
+func (c *CreditSchema) QNextQuota(db *sql.DB) error {
+	_, err :=
+		db.Exec(`UPDATE credit SET currentFee=currentFee+1, currentFeePaid=false
+              WHERE completed!=true AND currentFee<fees`)
+	return err
 }
 
 func QGetAllCredits(db *sql.DB, start int, count int) ([]CreditSchema, error) {
@@ -120,25 +157,6 @@ func QGetAllCredits(db *sql.DB, start int, count int) ([]CreditSchema, error) {
 	}
 
 	return credits, nil
-}
-
-func (c *CreditSchema) QPayCredit(db *sql.DB) error {
-	var err error
-	err = db.QueryRow(`SELECT * FROM credit WHERE id=$1`,
-		&c.ID).Scan(&c.ID, &c.TotalPrice, &c.FeeAmount, &c.Fees,
-		&c.CurrentFee, &c.CurrentFeePaid, &c.PurchaseDate,
-		&c.Completed, &c.CreatedAt)
-	if err != nil {
-		return err
-	}
-	if c.CurrentFeePaid == true {
-		return errors.New("quota_already_fulfilled")
-	}
-	c.CurrentFeePaid = true
-	_, err =
-		db.Exec("UPDATE credit SET currentFeePaid=$1 WHERE id=$2",
-			true, &c.ID)
-	return err
 }
 
 func QCalcDebtCredit(db *sql.DB) (uint32, error) {

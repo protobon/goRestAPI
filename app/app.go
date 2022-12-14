@@ -3,6 +3,7 @@ package app
 import (
 	"awesomeProject/app/routes"
 	"awesomeProject/database"
+	"awesomeProject/schedule"
 	"database/sql"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -36,4 +37,5 @@ func (a *App) Initialize(user string, password string, dbname string) {
 	var product = routes.Product{Router: a.Router, DB: a.DB}
 	credit.InitializeRoutes(credit.DB)
 	product.InitializeRoutes(product.DB)
+	schedule.RunCronJobs(a.DB)
 }
