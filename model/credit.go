@@ -10,15 +10,19 @@ import (
 )
 
 type CreditSchema struct {
-	ID             uint32    `json:"id"`
-	TotalPrice     float64   `json:"totalPrice"`
-	FeeAmount      uint32    `json:"feeAmount"`
-	Fees           uint8     `json:"fees"`
-	CurrentFee     uint8     `json:"currentFee"`
-	CurrentFeePaid bool      `json:"currentFeePaid"`
-	PurchaseDate   string    `json:"purchaseDate"`
+	ID             uint32    `json:"id,omitempty"`
+	TotalPrice     uint32    `json:"totalPrice,omitempty"`
+	FeeAmount      uint32    `json:"feeAmount,omitempty"`
+	Fees           uint8     `json:"fees,omitempty"`
+	CurrentFee     uint8     `json:"currentFee,omitempty"`
+	CurrentFeePaid bool      `json:"currentFeePaid,omitempty"`
+	PurchaseDate   string    `json:"purchaseDate,omitempty"`
 	Completed      bool      `json:"completed,omitempty"`
 	CreatedAt      time.Time `json:"createdAt,omitempty"`
+}
+
+type CreditDue struct {
+	Amount uint32 `json:"amount"`
 }
 
 func (c *CreditSchema) QGetCredit(db *sql.DB) ([]CreditSchema, error) {
@@ -185,6 +189,50 @@ func QCalcDebtCredit(db *sql.DB) (uint32, error) {
 		debt += c.FeeAmount
 	}
 	return debt, err
+}
+
+func QDisplayDueCredit(db *sql.DB) ([]CreditDue, error) {
+	var creditsDue []CreditDue
+	rows, err := db.Query("SELECT * FROM credit WHERE completed=false")
+	if err != nil {
+		log.Println(err)
+		return nil, err
+	}
+
+	defer func(rows *sql.Rows) {
+		err := rows.Close()
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+	}(rows)
+
+	for rows.Next() {
+		var c CreditSchema
+		err := rows.Scan(&c.ID, &c.TotalPrice,
+			&c.FeeAmount, &c.Fees, &c.CurrentFee,
+			&c.CurrentFeePaid, &c.PurchaseDate,
+			&c.Completed, &c.CreatedAt)
+		if err != nil {
+			log.Println(err)
+			return nil, err
+		}
+		var plus int
+		if c.CurrentFeePaid == false {
+			plus = 1
+		} else {
+			plus = 0
+		}
+		for i := 0; i < int(c.Fees-c.CurrentFee)+plus; i++ {
+			if i > len(creditsDue)-1 {
+				cd := CreditDue{c.FeeAmount}
+				creditsDue = append(creditsDue, cd)
+			} else {
+				creditsDue[i].Amount += c.FeeAmount
+			}
+		}
+	}
+	return creditsDue, nil
 }
 
 func QClearTableCredit(db *sql.DB) error {
