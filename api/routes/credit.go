@@ -45,7 +45,10 @@ func (credit *Credit) insertCredit(ctx *gin.Context, db *sql.DB) {
 		ctx.JSON(400, map[string]string{"error": "Invalid request payload"})
 		return
 	}
-
+	if c.Fees <= 0 || c.CurrentFee <= 0 {
+		ctx.JSON(400, map[string]string{"error": "Fee(s) must be greater than 0"})
+		return
+	}
 	if c.TotalPrice == 0 {
 		c.TotalPrice = c.FeeAmount * uint32(c.Fees)
 	} else if c.FeeAmount == 0 {
@@ -121,7 +124,7 @@ func (credit *Credit) payCredit(ctx *gin.Context, db *sql.DB) {
 
 // Function that triggers the Query to calculate debt for this month
 func (credit *Credit) calcDebtCredit(ctx *gin.Context, db *sql.DB) {
-	debt, err := model.QCalcDebtCredit(db)
+	debt, err := model.QThisMonthDebtCredit(db)
 	if err != nil {
 		log.Println(err)
 		ctx.JSON(500, err.Error())
@@ -155,17 +158,7 @@ func (credit *Credit) deleteCredit(ctx *gin.Context, db *sql.DB) {
 }
 
 func (credit *Credit) getCredits(ctx *gin.Context, db *sql.DB) {
-	start, _ := strconv.Atoi(ctx.Query("start"))
-	count, _ := strconv.Atoi(ctx.Query("count"))
-
-	if count > 10 || count < 1 {
-		count = 10
-	}
-	if start < 0 {
-		start = 0
-	}
-
-	credits, err := model.QGetAllCredits(db, start, count)
+	credits, err := model.QGetAllCredits(db)
 
 	if err != nil {
 		log.Println(err)
