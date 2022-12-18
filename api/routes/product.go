@@ -22,7 +22,7 @@ func (product *Product) getProduct(ctx *gin.Context, db *sql.DB) {
 	}
 
 	p := model.ProductSchema{ID: id}
-	if err := p.GetProduct(db); err != nil {
+	if err = p.QGetProduct(db); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			ctx.JSON(404, map[string]string{"error": "Product not found"})
@@ -42,7 +42,7 @@ func (product *Product) createProduct(ctx *gin.Context, db *sql.DB) {
 		return
 	}
 
-	if err := p.CreateProduct(db); err != nil {
+	if err := p.QCreateProduct(db); err != nil {
 		ctx.JSON(400, map[string]string{"error": "Could not create new Product"})
 		return
 	}
@@ -59,14 +59,14 @@ func (product *Product) updateProduct(ctx *gin.Context, db *sql.DB) {
 	}
 
 	var p model.ProductSchema
-	if err := ctx.BindJSON(&p); err != nil {
+	if err = ctx.BindJSON(&p); err != nil {
 		ctx.JSON(400, map[string]string{"error": "Invalid request payload"})
 		return
 	}
 
 	p.ID = id
 
-	if err := p.UpdateProduct(db); err != nil {
+	if err = p.QUpdateProduct(db); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			ctx.JSON(404, map[string]string{"error": "Product not found"})
@@ -88,7 +88,7 @@ func (product *Product) deleteProduct(ctx *gin.Context, db *sql.DB) {
 	}
 
 	p := model.ProductSchema{ID: id}
-	if err := p.DeleteProduct(db); err != nil {
+	if err = p.QDeleteProduct(db); err != nil {
 		switch err {
 		case sql.ErrNoRows:
 			ctx.JSON(404, map[string]string{"error": "Product not found"})
@@ -112,7 +112,7 @@ func (product *Product) getProducts(ctx *gin.Context, db *sql.DB) {
 		start = 0
 	}
 
-	products, err := model.GetProducts(db, start, count)
+	products, err := model.QGetProducts(db, start, count)
 	if err != nil {
 		log.Fatal(err)
 	}
