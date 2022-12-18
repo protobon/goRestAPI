@@ -1,18 +1,18 @@
 package main
 
 import (
-	"awesomeProject/app"
+	"awesomeProject/api"
 	"os"
 )
 
 func main() {
-	a := app.App{}
+	app := api.App{}
 
-	a.Initialize(
+	app.Initialize(
 		os.Getenv("APP_DB_USERNAME"),
 		os.Getenv("APP_DB_PASSWORD"),
 		os.Getenv("APP_DB_NAME"),
 	)
 
-	a.Run(":8080")
+	app.Run(":8080")
 }
