@@ -1,7 +1,7 @@
 package model
 
 import (
-	"awesomeProject/common"
+	"awesomeProject/database"
 	"database/sql"
 	"errors"
 	"fmt"
@@ -100,7 +100,7 @@ func (c *CreditSchema) QInsertCredit(db *sql.DB) error {
 		len(c.PurchaseDate)-2 >= closeDay {
 		c.CurrentFee = 0
 	}
-	err = db.QueryRow(common.CreditNewRecord,
+	err = db.QueryRow(database.CreditNewRecord,
 		&c.Card,
 		&c.TotalPrice,
 		&c.FeeAmount,
