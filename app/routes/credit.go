@@ -38,7 +38,7 @@ func (credit *Credit) getCredit(ctx *gin.Context, db *sql.DB) {
 	ctx.JSON(200, credits)
 }
 
-func (credit *Credit) createCredit(ctx *gin.Context, db *sql.DB) {
+func (credit *Credit) insertCredit(ctx *gin.Context, db *sql.DB) {
 	var c model.CreditSchema
 	if err := ctx.BindJSON(&c); err != nil {
 		log.Println(err)
@@ -52,7 +52,7 @@ func (credit *Credit) createCredit(ctx *gin.Context, db *sql.DB) {
 		c.FeeAmount = c.TotalPrice / uint32(c.Fees)
 	}
 
-	if err := c.QCreateCredit(db); err != nil {
+	if err := c.QInsertCredit(db); err != nil {
 		log.Println(err)
 		switch err {
 		case sql.ErrNoRows:
@@ -64,6 +64,36 @@ func (credit *Credit) createCredit(ctx *gin.Context, db *sql.DB) {
 	}
 
 	ctx.JSON(200, c)
+}
+
+func (credit *Credit) insertMany(ctx *gin.Context, db *sql.DB) {
+	var credits []model.CreditSchema
+	if err := ctx.BindJSON(&credits); err != nil {
+		log.Println(err)
+		ctx.JSON(400, map[string]string{"error": "Invalid request payload"})
+		return
+	}
+
+	for i := 0; i < len(credits); i++ {
+		c := credits[i]
+		if c.TotalPrice == 0 {
+			c.TotalPrice = c.FeeAmount * uint32(c.Fees)
+		} else if c.FeeAmount == 0 {
+			c.FeeAmount = c.TotalPrice / uint32(c.Fees)
+		}
+		if err := c.QInsertCredit(db); err != nil {
+			log.Println(err)
+			switch err {
+			case sql.ErrNoRows:
+				ctx.JSON(404, map[string]string{"error": "Could not create new Credit"})
+			default:
+				ctx.JSON(500, err.Error())
+			}
+			return
+		}
+	}
+
+	ctx.JSON(200, credits)
 }
 
 func (credit *Credit) payCredit(ctx *gin.Context, db *sql.DB) {
@@ -170,8 +200,11 @@ func (credit *Credit) InitializeRoutes(db *sql.DB) {
 	credit.Router.GET("/credits", func(ctx *gin.Context) {
 		credit.getCredits(ctx, db)
 	})
-	credit.Router.POST("/credit", func(ctx *gin.Context) {
-		credit.createCredit(ctx, db)
+	credit.Router.POST("/credit/insert", func(ctx *gin.Context) {
+		credit.insertCredit(ctx, db)
+	})
+	credit.Router.POST("/credit/insert-many", func(ctx *gin.Context) {
+		credit.insertMany(ctx, db)
 	})
 	credit.Router.GET("/credit/:id", func(ctx *gin.Context) {
 		credit.getCredit(ctx, db)

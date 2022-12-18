@@ -25,12 +25,19 @@ func DBInit(user string, password string, dbname string) *sql.DB {
 	}
 
 	CreateTableProduct(db)
+	CreateTableCard(db)
 	CreateTableCredit(db)
 	return db
 }
 
 func CreateTableProduct(db *sql.DB) {
 	if _, err := db.Exec(common.ProductTableCreationQuery); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func CreateTableCard(db *sql.DB) {
+	if _, err := db.Exec(common.CardTableCreationQuery); err != nil {
 		log.Fatal(err)
 	}
 }
