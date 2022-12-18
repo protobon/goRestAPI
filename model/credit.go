@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"strconv"
 	"time"
 )
 
@@ -76,6 +77,12 @@ func (c *CreditSchema) QInsertCredit(db *sql.DB) error {
 		return err
 	}
 
+	var purchaseDay int
+	purchaseDay, err = strconv.Atoi(c.PurchaseDate[len(c.PurchaseDate)-2:])
+	if err != nil {
+		return err
+	}
+
 	defer func(rows *sql.Rows) {
 		err = rows.Close()
 		if err != nil {
@@ -89,7 +96,7 @@ func (c *CreditSchema) QInsertCredit(db *sql.DB) error {
 		}
 	}
 	if c.CurrentFee == 1 && c.CurrentFeePaid == false &&
-		len(c.PurchaseDate)-2 >= closeDay {
+		purchaseDay >= closeDay {
 		c.CurrentFee = 0
 	}
 	err = db.QueryRow(database.CreditNewRecord,
@@ -207,11 +214,11 @@ func QThisMonthDebtCredit(db *sql.DB) (uint32, error) {
 	}(rows)
 
 	for rows.Next() {
-		err = rows.Scan(&c.FeeAmount)
+		err = rows.Scan(&c.FeeAmount, &c.ExpiredAmount)
 		if err != nil {
 			return 0, err
 		}
-		debt += c.FeeAmount
+		debt += c.FeeAmount + c.ExpiredAmount
 	}
 	return debt, err
 }
@@ -247,15 +254,20 @@ func QDisplayDueCredit(db *sql.DB) ([]CreditDue, error) {
 			log.Println(err)
 			return nil, err
 		}
+
 		if c.ExpiredAmount > 0 {
 			creditsDue[0].Amount += c.ExpiredAmount
 		}
+
 		plus := 0
-		if c.CurrentFeePaid == false && (c.CurrentFee != 0 ||
-			closeDay > int(c.PurchaseDate[len(c.PurchaseDate)-2])) {
+		if c.CurrentFee == 0 {
 			plus = 1
+		} else {
+			if c.CurrentFeePaid == false {
+				creditsDue[0].Amount += c.FeeAmount
+			}
 		}
-		for i := 0; i < int(c.Fees-c.CurrentFee)+plus; i++ {
+		for i := 1; i <= int(c.Fees-c.CurrentFee)+plus; i++ {
 			if i > len(creditsDue)-1 {
 				cd := CreditDue{c.FeeAmount}
 				creditsDue = append(creditsDue, cd)
