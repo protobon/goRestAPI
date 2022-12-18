@@ -1,7 +1,8 @@
 package main_test
 
 import (
-	"awesomeProject/app"
+	"awesomeProject/api"
+	"awesomeProject/database"
 	"bytes"
 	"encoding/json"
 	_ "github.com/lib/pq"
@@ -13,7 +14,7 @@ import (
 	"testing"
 )
 
-var a app.App
+var a api.App
 
 func TestMain(m *testing.M) {
 	a.Initialize(
@@ -28,23 +29,21 @@ func TestMain(m *testing.M) {
 }
 
 func ensureTableExists() {
-	if _, err := a.DB.Exec(tableCreationQuery); err != nil {
+	if _, err := a.DB.Exec(database.ProductTableCreate); err != nil {
 		log.Fatal(err)
 	}
 }
 
 func clearTable() {
-	a.DB.Exec("DELETE FROM products")
-	a.DB.Exec("ALTER SEQUENCE products_id_seq RESTART WITH 1")
+	_, err := a.DB.Exec("DELETE FROM product")
+	if err != nil {
+		return
+	}
+	_, err = a.DB.Exec("ALTER SEQUENCE product_id_seq RESTART WITH 1")
+	if err != nil {
+		return
+	}
 }
-
-const tableCreationQuery = `CREATE TABLE IF NOT EXISTS products
-(
-    id SERIAL,
-    name TEXT NOT NULL,
-    price NUMERIC(10,2) NOT NULL DEFAULT 0.00,
-    CONSTRAINT products_pkey PRIMARY KEY (id)
-)`
 
 func TestEmptyTable(t *testing.T) {
 	clearTable()
@@ -81,7 +80,10 @@ func TestGetNonExistentProduct(t *testing.T) {
 	checkResponseCode(t, http.StatusNotFound, response.Code)
 
 	var m map[string]string
-	json.Unmarshal(response.Body.Bytes(), &m)
+	err := json.Unmarshal(response.Body.Bytes(), &m)
+	if err != nil {
+		return
+	}
 	if m["error"] != "Product not found" {
 		t.Errorf("Expected the 'error' key of the response to be set to 'Product not found'. Got '%s'", m["error"])
 	}
@@ -99,7 +101,10 @@ func TestCreateProduct(t *testing.T) {
 	checkResponseCode(t, http.StatusCreated, response.Code)
 
 	var m map[string]interface{}
-	json.Unmarshal(response.Body.Bytes(), &m)
+	err := json.Unmarshal(response.Body.Bytes(), &m)
+	if err != nil {
+		return
+	}
 
 	if m["name"] != "test product" {
 		t.Errorf("Expected product name to be 'test product'. Got '%v'", m["name"])
@@ -132,7 +137,10 @@ func addProducts(count int) {
 	}
 
 	for i := 0; i < count; i++ {
-		a.DB.Exec("INSERT INTO products(name, price) VALUES($1, $2)", "Product "+strconv.Itoa(i), (i+1.0)*10)
+		_, err := a.DB.Exec("INSERT INTO products(name, price) VALUES($1, $2)", "Product "+strconv.Itoa(i), (i+1.0)*10)
+		if err != nil {
+			return
+		}
 	}
 }
 
@@ -144,7 +152,10 @@ func TestUpdateProduct(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/product/1", nil)
 	response := executeRequest(req)
 	var originalProduct map[string]interface{}
-	json.Unmarshal(response.Body.Bytes(), &originalProduct)
+	err := json.Unmarshal(response.Body.Bytes(), &originalProduct)
+	if err != nil {
+		return
+	}
 
 	var jsonStr = []byte(`{"name":"test product - updated name", "price": 11.22}`)
 	req, _ = http.NewRequest("PUT", "/product/1", bytes.NewBuffer(jsonStr))
@@ -155,7 +166,10 @@ func TestUpdateProduct(t *testing.T) {
 	checkResponseCode(t, http.StatusOK, response.Code)
 
 	var m map[string]interface{}
-	json.Unmarshal(response.Body.Bytes(), &m)
+	err = json.Unmarshal(response.Body.Bytes(), &m)
+	if err != nil {
+		return
+	}
 
 	if m["id"] != originalProduct["id"] {
 		t.Errorf("Expected the id to remain the same (%v). Got %v", originalProduct["id"], m["id"])
