@@ -12,8 +12,7 @@ func RunCronJobs(db *sql.DB) {
 	s := gocron.NewScheduler(time.UTC)
 	fmt.Println("Schedule QNextQuota() Every 1st of each month...")
 	_, err := s.Every(1).Month(1).Do(func() {
-		c := model.CreditSchema{}
-		err := c.QNextQuota(db)
+		err := model.QCreditNextQuotaAll(db)
 		if err != nil {
 			return
 		}
