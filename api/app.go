@@ -1,7 +1,7 @@
-package app
+package api
 
 import (
-	"awesomeProject/app/routes"
+	"awesomeProject/api/routes"
 	"awesomeProject/database"
 	"awesomeProject/schedule"
 	"database/sql"
@@ -36,9 +36,13 @@ func (a *App) Initialize(user string, password string, dbname string) {
 	var product = routes.Product{Router: a.Router, DB: a.DB}
 	var card = routes.Card{Router: a.Router, DB: a.DB}
 	var credit = routes.Credit{Router: a.Router, DB: a.DB}
+	var serviceFixed = routes.ServiceFixed{Router: a.Router, DB: a.DB}
+	var serviceVariable = routes.ServiceVariable{Router: a.Router, DB: a.DB}
 
 	card.InitializeRoutes(card.DB)
 	product.InitializeRoutes(product.DB)
 	credit.InitializeRoutes(credit.DB)
+	serviceFixed.InitializeRoutes(serviceFixed.DB)
+	serviceVariable.InitializeRoutes(serviceVariable.DB)
 	schedule.RunCronJobs(a.DB)
 }
