@@ -33,9 +33,12 @@ func (a *App) Initialize(user string, password string, dbname string) {
 	}
 	a.Router = gin.Default()
 
-	var credit = routes.Credit{Router: a.Router, DB: a.DB}
 	var product = routes.Product{Router: a.Router, DB: a.DB}
-	credit.InitializeRoutes(credit.DB)
+	var card = routes.Card{Router: a.Router, DB: a.DB}
+	var credit = routes.Credit{Router: a.Router, DB: a.DB}
+
+	card.InitializeRoutes(card.DB)
 	product.InitializeRoutes(product.DB)
+	credit.InitializeRoutes(credit.DB)
 	schedule.RunCronJobs(a.DB)
 }
