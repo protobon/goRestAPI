@@ -1,4 +1,4 @@
-package common
+package database
 
 var CreditNewRecord = `INSERT INTO credit(
                    card,
