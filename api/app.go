@@ -1,12 +1,12 @@
 package api
 
 import (
-	"awesomeProject/api/routes"
-	"awesomeProject/database"
-	"awesomeProject/schedule"
 	"database/sql"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"goRestAPI/api/routes"
+	"goRestAPI/database"
+	"goRestAPI/schedule"
 	"log"
 )
 
@@ -31,18 +31,22 @@ func (a *App) Initialize(user string, password string, dbname string) {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	a.Router = gin.Default()
 
-	var product = routes.Product{Router: a.Router, DB: a.DB}
-	var card = routes.Card{Router: a.Router, DB: a.DB}
+	var dummy = routes.Dummy{Router: a.Router, DB: a.DB}
+	var creditCard = routes.CreditCard{Router: a.Router, DB: a.DB}
 	var credit = routes.Credit{Router: a.Router, DB: a.DB}
-	var serviceFixed = routes.ServiceFixed{Router: a.Router, DB: a.DB}
-	var serviceVariable = routes.ServiceVariable{Router: a.Router, DB: a.DB}
+	var rent = routes.Rent{Router: a.Router, DB: a.DB}
+	var bill = routes.Bill{Router: a.Router, DB: a.DB}
+	var debitCard = routes.DebitCard{Router: a.Router, DB: a.DB}
 
-	card.InitializeRoutes(card.DB)
-	product.InitializeRoutes(product.DB)
+	dummy.InitializeRoutes(dummy.DB)
+	creditCard.InitializeRoutes(creditCard.DB)
 	credit.InitializeRoutes(credit.DB)
-	serviceFixed.InitializeRoutes(serviceFixed.DB)
-	serviceVariable.InitializeRoutes(serviceVariable.DB)
+	rent.InitializeRoutes(rent.DB)
+	bill.InitializeRoutes(bill.DB)
+	debitCard.InitializeRoutes(debitCard.DB)
 	schedule.RunCronJobs(a.DB)
+	fmt.Println("***** App Running *****")
 }

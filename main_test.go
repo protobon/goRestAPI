@@ -1,11 +1,11 @@
 package main_test
 
 import (
-	"awesomeProject/api"
-	"awesomeProject/database"
 	"bytes"
 	"encoding/json"
 	_ "github.com/lib/pq"
+	"goRestAPI/api"
+	"goRestAPI/database"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -29,7 +29,7 @@ func TestMain(m *testing.M) {
 }
 
 func ensureTableExists() {
-	if _, err := a.DB.Exec(database.ProductTableCreate); err != nil {
+	if _, err := a.DB.Exec(database.DummyTableCreate); err != nil {
 		log.Fatal(err)
 	}
 }

@@ -1,9 +1,9 @@
 package routes
 
 import (
-	"awesomeProject/model"
 	"database/sql"
 	"github.com/gin-gonic/gin"
+	"goRestAPI/model"
 	"log"
 	"strconv"
 )

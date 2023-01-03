@@ -23,22 +23,24 @@ func DBInit(user string, password string, dbname string) *sql.DB {
 		log.Fatal(err)
 	}
 
-	CreateTableProduct(db)
-	CreateTableCard(db)
+	CreateTableDummy(db)
+	CreateTableCreditCard(db)
 	CreateTableCredit(db)
-	CreateTableServiceFixed(db)
-	CreateTableServiceVariable(db)
+	CreateTableRent(db)
+	CreateTableBill(db)
+	CreateTableDebitCard(db)
+	CreateTableDebit(db)
 	return db
 }
 
-func CreateTableProduct(db *sql.DB) {
-	if _, err := db.Exec(ProductTableCreate); err != nil {
+func CreateTableDummy(db *sql.DB) {
+	if _, err := db.Exec(DummyTableCreate); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func CreateTableCard(db *sql.DB) {
-	if _, err := db.Exec(CardTableCreate); err != nil {
+func CreateTableCreditCard(db *sql.DB) {
+	if _, err := db.Exec(CreditCardTableCreate); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -49,14 +51,26 @@ func CreateTableCredit(db *sql.DB) {
 	}
 }
 
-func CreateTableServiceFixed(db *sql.DB) {
-	if _, err := db.Exec(FixedServiceTableCreate); err != nil {
+func CreateTableRent(db *sql.DB) {
+	if _, err := db.Exec(RentTableCreate); err != nil {
 		log.Fatal(err)
 	}
 }
 
-func CreateTableServiceVariable(db *sql.DB) {
-	if _, err := db.Exec(VariableServiceTableCreate); err != nil {
+func CreateTableBill(db *sql.DB) {
+	if _, err := db.Exec(BillTableCreate); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func CreateTableDebitCard(db *sql.DB) {
+	if _, err := db.Exec(DebitCardTableCreate); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func CreateTableDebit(db *sql.DB) {
+	if _, err := db.Exec(DebitTableCreate); err != nil {
 		log.Fatal(err)
 	}
 }

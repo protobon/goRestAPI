@@ -1,17 +1,17 @@
 package model
 
 import (
-	"awesomeProject/database"
 	"database/sql"
 	"errors"
 	"fmt"
+	"goRestAPI/database"
 	"log"
 	"strconv"
 	"time"
 )
 
 type CreditSchema struct {
-	ID             uint32    `json:"id,omitempty"`
+	ID             uint32    `json:"id"`
 	Card           int       `json:"card"`
 	TotalPrice     uint32    `json:"totalPrice,omitempty"`
 	FeeAmount      uint32    `json:"feeAmount"`
@@ -21,7 +21,8 @@ type CreditSchema struct {
 	CurrentFeePaid bool      `json:"currentFeePaid"`
 	PurchaseDate   string    `json:"purchaseDate"`
 	Completed      bool      `json:"completed"`
-	CreatedAt      time.Time `json:"createdAt,omitempty"`
+	CreatedAt      time.Time `json:"createdAt"`
+	UpdatedAt      time.Time `json:"updatedAt,omitempty"`
 }
 
 type CreditDue struct {
@@ -55,7 +56,7 @@ func (c *CreditSchema) QGetCredit(db *sql.DB) ([]CreditSchema, error) {
 		if err = rows.Scan(&c.ID, &c.Card, &c.TotalPrice,
 			&c.FeeAmount, &c.ExpiredAmount, &c.Fees,
 			&c.CurrentFee, &c.CurrentFeePaid, &c.PurchaseDate,
-			&c.Completed, &c.CreatedAt); err != nil {
+			&c.Completed, &c.CreatedAt, &c.UpdatedAt); err != nil {
 			return nil, err
 		}
 		credits = append(credits, *c)

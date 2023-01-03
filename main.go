@@ -1,7 +1,7 @@
 package main
 
 import (
-	"awesomeProject/api"
+	"goRestAPI/api"
 	"os"
 )
 

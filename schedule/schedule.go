@@ -1,10 +1,10 @@
 package schedule
 
 import (
-	"awesomeProject/model"
 	"database/sql"
 	"fmt"
 	"github.com/go-co-op/gocron"
+	"goRestAPI/model"
 	"time"
 )
 

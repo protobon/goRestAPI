@@ -1,4 +1,4 @@
-module awesomeProject
+module goRestAPI
 
 go 1.20
 
