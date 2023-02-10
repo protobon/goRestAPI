@@ -9,9 +9,9 @@ func main() {
 	app := api.App{}
 
 	app.Initialize(
-		os.Getenv("APP_DB_USERNAME"),
-		os.Getenv("APP_DB_PASSWORD"),
-		os.Getenv("APP_DB_NAME"),
+		os.Getenv("TEST_POSTGRES_USER"),
+		os.Getenv("TEST_POSTGRES_PASSWORD"),
+		os.Getenv("TEST_POSTGRES_DB"),
 	)
 
 	app.Run(":8080")

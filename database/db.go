@@ -3,17 +3,17 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/lib/pq"
 	"log"
+
+	_ "github.com/lib/pq"
 )
 
 func DBInit(user string, password string, dbname string) *sql.DB {
 	connectionString :=
-		fmt.Sprintf("postgres://%v:%v@%v:%v/%v?sslmode=disable",
+		fmt.Sprintf("postgres://%v:%v@%v/%v?sslmode=disable",
 			user,
 			password,
-			"localhost",
-			5432,
+			"postgresdb_test",
 			dbname)
 
 	var err error

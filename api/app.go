@@ -3,11 +3,12 @@ package api
 import (
 	"database/sql"
 	"fmt"
-	"github.com/gin-gonic/gin"
 	"goRestAPI/api/routes"
 	"goRestAPI/database"
 	"goRestAPI/schedule"
 	"log"
+
+	"github.com/gin-gonic/gin"
 )
 
 type App struct {
