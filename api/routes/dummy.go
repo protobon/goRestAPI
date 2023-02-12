@@ -2,10 +2,11 @@ package routes
 
 import (
 	"database/sql"
-	"github.com/gin-gonic/gin"
 	"goRestAPI/model"
 	"log"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 type Dummy struct {

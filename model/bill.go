@@ -9,10 +9,10 @@ import (
 type BillSchema struct {
 	ID        int       `json:"id"`
 	Amount    int       `json:"amount"`
-	DueDate   time.Time `json:"dueDate"`
+	DueDate   time.Time `json:"due_date"`
 	Active    bool      `json:"active"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (b *BillSchema) QGetBill(db *sql.DB) error {

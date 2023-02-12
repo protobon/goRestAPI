@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"goRestAPI/api/routes"
 	"goRestAPI/database"
-	"goRestAPI/schedule"
 	"log"
 
 	"github.com/gin-gonic/gin"
@@ -36,18 +35,18 @@ func (a *App) Initialize(user string, password string, dbname string) {
 	a.Router = gin.Default()
 
 	var dummy = routes.Dummy{Router: a.Router, DB: a.DB}
-	var creditCard = routes.CreditCard{Router: a.Router, DB: a.DB}
-	var credit = routes.Credit{Router: a.Router, DB: a.DB}
-	var rent = routes.Rent{Router: a.Router, DB: a.DB}
-	var bill = routes.Bill{Router: a.Router, DB: a.DB}
-	var debitCard = routes.DebitCard{Router: a.Router, DB: a.DB}
+	// var creditCard = routes.CreditCard{Router: a.Router, DB: a.DB}
+	// var credit = routes.Credit{Router: a.Router, DB: a.DB}
+	// var rent = routes.Rent{Router: a.Router, DB: a.DB}
+	// var bill = routes.Bill{Router: a.Router, DB: a.DB}
+	// var debitCard = routes.DebitCard{Router: a.Router, DB: a.DB}
 
 	dummy.InitializeRoutes(dummy.DB)
-	creditCard.InitializeRoutes(creditCard.DB)
-	credit.InitializeRoutes(credit.DB)
-	rent.InitializeRoutes(rent.DB)
-	bill.InitializeRoutes(bill.DB)
-	debitCard.InitializeRoutes(debitCard.DB)
-	schedule.RunCronJobs(a.DB)
+	// creditCard.InitializeRoutes(creditCard.DB)
+	// credit.InitializeRoutes(credit.DB)
+	// rent.InitializeRoutes(rent.DB)
+	// bill.InitializeRoutes(bill.DB)
+	// debitCard.InitializeRoutes(debitCard.DB)
+	// schedule.RunCronJobs(a.DB)
 	fmt.Println("***** App Running *****")
 }
